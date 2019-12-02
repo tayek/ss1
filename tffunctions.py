@@ -1,10 +1,13 @@
 from __future__ import absolute_import, division, print_function, unicode_literals
+import math
 import datetime
+t=datetime.datetime.utcnow().timestamp()
+key=str(t-math.floor(t))
+print("key:",key)
 from os.path import join
 import pathlib
 import matplotlib.pyplot as plt
 import pandas as pd
-import math
 import numpy as np
 import glob
 import ntpath
@@ -106,26 +109,35 @@ def time_map_varying_parallel(ds,parse,units,title=""):
             time_dataset_map(ds,parse1and,units,i,title=title)
         time_dataset_map(ds,parse1and,units,autotune,title=title)
 def do_enumeration(ds,parse=None,parse2=None):
-        for i,x in enumerate(ds):
-            if parse is not None:
-                y=parse(x)
-            if parse2 is not None:
-                y=parse2(i)
-            if i<1 or i%5000==0:
-                print(i,type(x),str(x)[:20])
-                #print(x.shape)
-                #print("y",type(y),y.shape)
+    n=0
+    for i,x in enumerate(ds):
+        if parse is not None:
+            y=parse(x)
+        if parse2 is not None:
+            y=parse2(i)
+        if i<1 or i%5000==0:
+            print(i,type(x),str(x)[:20])
+            #print(x.shape)
+            #print("y",type(y),y.shape)
+        n+=1
+    print("after enumeration, n: ",n,flush=True)
 def time_enumeration(ds,units):
     print("start enumeration.",flush=True)
-    n=0
     with f.timing("enumerate over dataset "+str(units)+" units.",units):
         do_enumeration(ds)
-    print("after enumeration, n: ",n,flush=True)
-key=None
+def junk(n):
+    name="junk"+str(n)+".txt.junk"
+    if key is not None:
+        k=key
+        if len(k)>6:
+            k=k[len(k)-6:-1]
+        name=k+"."+name
+    name="data/"+name
+    return name
 def write_file(n): # not thread safe
-    now = datetime.now().strftime("%d/%m/%Y %H:%M:%S")
-    name="data/junk"+str(n)+".txt" if key is None else "data/"+key+".junk."+str(n)+".txt"
-    f.create_file("data/junk"+str(n)+".txt",str([now]))
+    name=junk(n)
+    now=datetime.datetime.utcnow().timestamp()
+    f.create_file(name,str([now]))
 def time_enumerations(ds,units=1,title=""):
     with f.timing("enumerate over dataset of "+str(units)+" units and map outside of dataset.",units,title): # why does this require the f.?
         do_enumeration(ds,parse=parse1)
@@ -175,7 +187,7 @@ def run():
         path=pathlib.Path(path)
         get_list_of_files_in_different_ways(path,pattern)
 
-    units=100
+    units=10
     print("--------------------------------------------")
     if False:
         try:
@@ -209,6 +221,7 @@ def run():
     print("--------------------------------------------")
     if one:
         exit()
+    exit()
     try:
         print("all the cars")
         time_one_pass(x,title)
@@ -218,9 +231,6 @@ def run():
 
 def main():
     np.set_printoptions(precision=4)
-    t=datetime.datetime.utcnow().timestamp()
-    key=t-math.floor(t)
-    print("key:",key)
     run()
 if __name__ == "__main__":
    main()

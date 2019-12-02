@@ -25,6 +25,13 @@ def run():
         units=len(files)
         print(i,"folder: "+folder,"has:",len(files),"files.")
         with f.timing("folder: "+folder+" ["+str(i)+"] has: "+str(len(files))+" files.",units,title):
+            ds=tff.make_tensor_slices_dataset_list(files) 
+    print("----------------------------------------------")  
+    for i,folder in enumerate(x): 
+        files=f.get_files(folder,"*.png")
+        units=len(files)
+        print(i,"folder: "+folder,"has:",len(files),"files.")
+        with f.timing("folder: "+folder+" ["+str(i)+"] has: "+str(len(files))+" files.",units,title):
             ds=tff.make_tensor_slices_dataset_list(files)   
             mapped=ds.map(tff.parse1and,tff.autotune)
             tff.do_enumeration(mapped,parse2=tff.write_file)

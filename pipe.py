@@ -19,23 +19,25 @@ import tffunctions as tff
 x,y,z=f.get_lists_of_filenames()
 print("got (",len(x),len(y),len(z),") files.",flush=True)
 units=len(x)
-units=799
+units=100
 with f.timing("make dataset with "+str(units)+" units.",units):
     ds=tff.make_tensor_slices_dataset_list(x[:units])
-start=timer()
-tff.time_enumertation(ds)
-end=timer()
-print("et:",str(end-start))
+print("enumerate original.",flush=True)
+tff.time_enumeration(ds,units)
+print("---------------------------------")
 with f.timing("map filename to image: "+str(units)+" units.",units):
     mapped=ds.map(tff.parse1and,tff.autotune) # was parse1and
+print("enumerate mapped.",flush=True)
+tff.time_enumeration(mapped,units)
+print("---------------------------------")
 with f.timing("batch dataset: "+str(units)+" units.",units):
     batch_size=10
-    batch_dataset = ds.batch(batch_size)
+    batch_dataset = mapped.batch(batch_size)
+print("enumerate batch.",flush=True)
+tff.time_enumeration(ds,units)
+print("---------------------------------")
 with f.timing("prfetch dataset: "+str(units)+" units.",units):
     prefetched_dataset = batch_dataset.prefetch(1)
-print("enumerate.",flush=True)
-start=timer()
-time_enumertation(prefetched_dataset)
-end=timer()
-print("et:",str(end-start))
+print("enumerate prefetch.",flush=True)
+tff.time_enumeration(prefetched_dataset,units)
 
