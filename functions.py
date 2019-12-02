@@ -20,9 +20,9 @@ def timing(description: str,units=1,title="") -> None:
     np.set_printoptions(precision=4)
     #print(f"{description}: {dt} seconds. {str(frequency)}") if n is None else print(f"{description}: {dt} seconds.")
     if units is None:
-        print(f"{title} {description}: {dt} seconds.")
+        print(f"{title} {description}: {dt} seconds.",flush=True)
     else:
-        print(f"{title} {description}: {dt} seconds. {str(frequency)} units/second.") 
+        print(f"{title} {description}: {dt} seconds. {str(frequency)} units/second.",flush=True) 
 def fix(path):
     return path.replace("\\","/").replace("\\","")
 def path_head(path):
@@ -94,11 +94,11 @@ def extract_semantic_file_name_from_image_file_name(file_name_image): # not used
     file_name_semantic_label = file_name_semantic_label.split('_')
     file_name_semantic_label = file_name_semantic_label[0] + '_' + 'label_' +  file_name_semantic_label[2] + '_' + file_name_semantic_label[3] + '.png'
     return file_name_semantic_label
-def create_file(filename,filenames):
+def create_file(filename,lines):
     try:
         with open(filename,'w') as filehandle:
-            for name in filenames:
-                filehandle.write(name+'\n')
+            for line in lines:
+                filehandle.write(line+'\n')
     except Exception as e:
         print(e)
 def is_ok(actual,expected):

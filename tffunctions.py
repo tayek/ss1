@@ -1,4 +1,5 @@
 from __future__ import absolute_import, division, print_function, unicode_literals
+import datetime
 from os.path import join
 import pathlib
 import matplotlib.pyplot as plt
@@ -13,8 +14,9 @@ from timeit import default_timer as timer
 import functions as f
 with f.timing("import tensorflow",1):
     import tensorflow as tf
+# datetime object containing current date and time
 one=False
-one=True
+#one=True
 autotune = tf.data.experimental.AUTOTUNE
 def time_make_list_files_dataset_str(path,pattern): # this is a list files dataset.
     path=pathlib.Path(path)
@@ -73,13 +75,9 @@ def parse1(filename):
     binary=read_file(filename)
     return binary
 def parse3(filename,y,z):
-    binary=read_file(filename)
-    return binary,y,z
+    return read_file(filename),y,z
 def parse1and(image_filename): # like ings, but with .png instead of .jpeg.
-    print("enter parse1 with:",type(image_filename),str(image_filename)[:50])
-    binary=process_image(image_filename)
-    print("parse1and returns:",type(binary))
-    return binary
+    return process_image(image_filename)
 def parse3and(image_filename,json_filename,label_filename):
     binary=process_image(image_filename)
     return binary, json_filename, label_filename
@@ -107,28 +105,67 @@ def time_map_varying_parallel(ds,parse,units,title=""):
         for i in range(1,9):
             time_dataset_map(ds,parse1and,units,i,title=title)
         time_dataset_map(ds,parse1and,units,autotune,title=title)
-def do_enumerations(ds,parse=None):
+def do_enumeration(ds,parse=None,parse2=None):
         for i,x in enumerate(ds):
+            if parse is not None:
+                y=parse(x)
+            if parse2 is not None:
+                y=parse2(i)
             if i<1 or i%5000==0:
-                #print(i,type(x),str(x)[:20])
+                print(i,type(x),str(x)[:20])
                 #print(x.shape)
-                if parse is not None:
-                    y=parse(x)
                 #print("y",type(y),y.shape)
+def time_enumeration(ds,units):
+    print("start enumeration.",flush=True)
+    n=0
+    with f.timing("enumerate over dataset "+str(units)+" units.",units):
+        do_enumeration(ds)
+    print("after enumeration, n: ",n,flush=True)
+key=None
+def write_file(n): # not thread safe
+    now = datetime.now().strftime("%d/%m/%Y %H:%M:%S")
+    name="data/junk"+str(n)+".txt" if key is None else "data/"+key+".junk."+str(n)+".txt"
+    f.create_file("data/junk"+str(n)+".txt",str([now]))
 def time_enumerations(ds,units=1,title=""):
     with f.timing("enumerate over dataset of "+str(units)+" units and map outside of dataset.",units,title): # why does this require the f.?
-        do_enumerations(ds,parse1)
-    mapped=time_dataset_map(ds,parse1and,units,autotune,title=title+" time dataset.map inside dataset (no enumeration).")
-    with f.timing("enumerate over mapped "+str(units)+" units outside of dataset.",units,title):
-        do_enumerations(mapped)
+        do_enumeration(ds,parse=parse1)
+    print("1",flush=True)
+    mapped=time_dataset_map(ds,parse1and,units,autotune,title=title+"time dataset.map inside dataset (no enumeration).")
+    print("2",flush=True)
+    with f.timing("enumerate over mapped dataset"+str(units)+" units outside of dataset.",units,title):
+        do_enumeration(mapped,parse2=write_file)
 def do_one_pass(list_of_filenames):
         ds= make_tensor_slices_dataset_list(list_of_filenames)
         mapped=map_dataset(ds,parse1and,num_parallel_calls=autotune)
-        do_enumerations(mapped)
+        do_enumeration(mapped,parse2=write_file)
 def time_one_pass(list_of_filenames,title=""):
     units=len(list_of_filenames)
     with f.timing("one full pass of enumerating mapped "+str(units)+" units outside of dataset.",units=units,title=title):
         do_one_pass(list_of_filenames)
+def rollup(ds,units,parallel=1): # not used. came from old code just in case we want it.
+    # this need a local timing also.
+    with f.timing("make pipline from dataset "+str(units)+" batches with parallel="+str(parallel),units=units):
+        ds2 = ds.map(lambda x: x+1,num_parallel_calls=parallel)
+        ds3 = ds2.shuffle(min(units,10000))
+        repeat=10
+        ds4 = ds3.repeat(repeat)
+        batch=100
+        ds5 = ds4.batch(batch)
+        batches=units*repeat//batch
+        # Use prefetch() to overlap the producer and consumer.
+        ds6 = ds5.prefetch(1) #batches
+        #print(batches,"batches")
+    with f.timing("iterate"+str(batches),units=batches):
+        print("iterate",flush=True)
+        i=0
+        n=0
+        for i,x in enumerate(ds6):
+            if i<0 or i%5000==0:
+                print(i,type(x),len(x),str(x)[:20])
+            n+=1
+    print("after enumerationm, n: ",n,flush=True)
+    if n!=batches:
+        print(n,"!=",batches)
 def run():
     print("one:",one)
     if False:
@@ -138,25 +175,30 @@ def run():
         path=pathlib.Path(path)
         get_list_of_files_in_different_ways(path,pattern)
 
+    units=100
     print("--------------------------------------------")
-    try:
-        title="flowers"
-        from_glob=f.get_files("in/flower_photos/tulips","*.jpg")
-        units=len(from_glob)
-        if one:
-            units=2
-        from_glob=from_glob[:units]    
-        ds= time_make_tensor_slices_dataset_list(from_glob,title=title+" make dataset from list of filenames")
-        time_enumerations(ds,units,title=title)
-        time_one_pass(from_glob,title)
-    except Exception as e:
-        print("caught:",e)
+    if False:
+        try:
+            title="flowers"
+            from_glob=f.get_files("in/flower_photos/tulips","*.jpg")
+            units=len(from_glob)
+            if one:
+                units=2
+            from_glob=from_glob[:units]    
+            ds= time_make_tensor_slices_dataset_list(from_glob,title=title+" make dataset from list of filenames")
+            time_enumerations(ds,units,title=title)
+            time_one_pass(from_glob,title)
+        except Exception as e:
+            print("caught:",e)
     print("--------------------------------------------")
+    if False:
+        exit()
     try:
         title="cars"
+        print("get filenames from text file(s).",flush=True)
         x,y,z=f.get_lists_of_filenames()
-        path=f.path_head(x[0])
-        leaf=f.path_leaf(x[0])
+        #path=f.path_head(x[0])
+        #leaf=f.path_leaf(x[0])
         #units=1000
         ds=time_make_tensor_slices_dataset_list(x[:units],title=title)
         #time_map_varying_parallel(ds,units)
@@ -176,8 +218,10 @@ def run():
 
 def main():
     np.set_printoptions(precision=4)
+    t=datetime.datetime.utcnow().timestamp()
+    key=t-math.floor(t)
+    print("key:",key)
     run()
-    pass
 if __name__ == "__main__":
    main()
 # http://cs230.stanford.edu/blog/datapipeline/
