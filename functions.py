@@ -32,7 +32,7 @@ def path_leaf(path):
     head, tail = ntpath.split(path)
     return tail or ntpath.basename(head)
 def get_root():
-    return "l:/ss/" # change the 'l' to 'L'
+    return "L:/ss/" # was l:
 def get_path():
     return "sem"
 def get_my_path():

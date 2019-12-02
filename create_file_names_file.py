@@ -69,9 +69,9 @@ def get_filenames_from_camera_folders(path,root=None):
 root=f.get_root()
 path=f.get_path()
 (filename,image_filename,json_filename,label_filename)=f.get_my_filenames()
-image_file_name=filename
+image_filename=filename
 actual=[]
-if os.path.exists(image_file_name):
+if os.path.exists(image_filename):
     print(image_filename+" exists")
     print("reading:",image_filename)
     actual=f.read_filenames_from_disk(image_filename)

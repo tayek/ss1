@@ -18,13 +18,13 @@ print(tf.__version__)
 import tffunctions as tff
 print("get filenames from text file")
 x,y,z=f.get_lists_of_filenames()
-units=1000
+units=200
 print("make dataset with:",units,"units")
 ds=tff.make_tensor_slices_dataset_list(x[:units])
 print("map dataset")
 mapped=ds.map(tff.process_image,tff.autotune) # was parse1and
 print("batch dataset")
-batch_size=100
+batch_size=10
 batch_dataset = ds.batch(batch_size)
 print("prefetch dataset")
 prefetched_dataset = batch_dataset.prefetch(1)
