@@ -8,23 +8,28 @@ import gc
 exitFlag = 0
 
 class myThread (threading.Thread):
-   def __init__(self, threadID, name, q):
+   def __init__(self, threadID, name, q,f=None):
       threading.Thread.__init__(self)
       self.threadID = threadID
       self.name = name
       self.q = q
+      self.f = f
    def run(self):
       print("Starting " + self.name)
-      process_data(self.name, self.q)
+      process_data(self.name, self.q,self.f)
       print("Exiting " + self.name)
 
-def process_data(threadName, q):
+def process_data(threadName, q,f=None):
     while not exitFlag:
         queueLock.acquire()
         if not workQueue.empty():
            data = q.get()
            queueLock.release()
            print("%s processing %s" % (threadName, data))
+           if f is not None:
+               f(data)
+               pass
+
         else:
            queueLock.release()
         time.sleep(1)
@@ -36,9 +41,11 @@ workQueue = mp.Queue(10)
 threads = []
 threadID = 1
 
+def f0(x):
+    print('x',x)
 # Create new threads
 for tName in threadList:
-    thread = myThread(threadID, tName, workQueue)
+    thread = myThread(threadID, tName, workQueue,f0)
     thread.start()
     threads.append(thread)
     threadID += 1
