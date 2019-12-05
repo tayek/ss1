@@ -8,6 +8,8 @@ import numpy as np
 import glob
 import ntpath
 import json
+import PIL
+print('Pillow Version:', PIL.__version__)
 from contextlib import contextmanager
 from timeit import default_timer as timer
 import functions as f
@@ -20,6 +22,7 @@ x,y,z=f.get_lists_of_filenames()
 print("got (",len(x),len(y),len(z),") files.",flush=True)
 units=len(x)
 units=100
+print("---------------------------------")
 with f.timing("make dataset with "+str(units)+" units.",units):
     ds=tff.make_tensor_slices_dataset_list(x[:units])
 print("enumerate original.",flush=True)
@@ -34,10 +37,11 @@ with f.timing("batch dataset: "+str(units)+" units.",units):
     batch_size=10
     batch_dataset = mapped.batch(batch_size)
 print("enumerate batch.",flush=True)
-tff.time_enumeration(ds,units)
+tff.time_enumeration(batch_dataset,units)
 print("---------------------------------")
 with f.timing("prfetch dataset: "+str(units)+" units.",units):
     prefetched_dataset = batch_dataset.prefetch(1)
 print("enumerate prefetch.",flush=True)
 tff.time_enumeration(prefetched_dataset,units)
+print("---------------------------------")
 

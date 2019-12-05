@@ -1,3 +1,7 @@
+import platform;
+print("get platform")
+print("platform:",platform.python_implementation())
+print("got platform")
 import numpy as np
 np.set_printoptions(precision=4)
 import numpy.linalg as la
@@ -12,7 +16,9 @@ from contextlib import contextmanager
 #from time import time
 from timeit import default_timer as timer
 @contextmanager
-def timing(description: str,units=1,title="") -> None:
+def timing(description: str,units=1,title="",before="") -> None:
+    if before!="":
+        print(before,flush=True)
     start = timer()
     yield
     dt = timer() - start
@@ -23,6 +29,7 @@ def timing(description: str,units=1,title="") -> None:
         print(f"{title} {description}: {dt} seconds.",flush=True)
     else:
         print(f"{title} {description}: {dt} seconds. {str(frequency)} units/second.",flush=True) 
+    return dt
 def fix(path):
     return path.replace("\\","/").replace("\\","")
 def path_head(path):

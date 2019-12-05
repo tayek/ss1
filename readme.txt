@@ -36,3 +36,17 @@ see the stuff at the bottom of ingpipe.py
 
 ok, plan is to use one list of files and make a pipe, then tune it.
 
+12/3/19
+
+went through image tutorial. jpegs are about 1/10'th of the size of the png's.
+
+looked at interleave.
+
+looks like the jpegs are about 1/10'th the size of the pngs!
+
+looks like we can read about 10 jpegs/second
+
+https://stackoverflow.com/questions/2802726/putting-a-simple-if-then-else-statement-on-one-line
+
+so we have multithreading and muktiprocessing. let's see what we can do with them seerately and together.
+
