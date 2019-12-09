@@ -50,3 +50,14 @@ https://stackoverflow.com/questions/2802726/putting-a-simple-if-then-else-statem
 
 so we have multithreading and muktiprocessing. let's see what we can do with them seerately and together.
 
+we seem to have some problems.
+    1) the vs code bash terminal hangs a lot.
+    2) the dos box is hard to interrupt a python program with control-c.
+
+control-break solves the control-c problem.
+
+still only about 10 pics/second. 
+using multiple threads costs a lot, we get close to 10 with many threads.
+maybe we can overlap the cpu time with the io time, so i made slow.
+i keep breaking my.py - need to start over with a fresh copy of mt0.py
+

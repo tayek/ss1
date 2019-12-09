@@ -15,6 +15,47 @@ epsilon = 1.0e-10 # norm should not be small
 from contextlib import contextmanager
 #from time import time
 from timeit import default_timer as timer
+import sys
+def display(var): # not used?
+    import inspect, re
+    callingframe = inspect.currentframe().f_back
+    cntext = "".join(inspect.getframeinfo(callingframe, 5)[3]) #gets 5 lines
+    m = re.search("display\s+\(\s+(\w+)\s+\)", cntext, re.MULTILINE)
+    print("m:",m)
+    print(m.group(1), type(var), var)
+
+def value_of(name): # va or vo
+    calling_frame = sys._getframe().f_back
+    value = calling_frame.f_locals.get(name, calling_frame.f_globals.get(name, None))
+    #print("in value of(): name:",name,", value:",value)
+    return value
+def ppl(name,n=3,print_=False): # print part of a list
+        #calling_frame = sys._getframe().f_back
+        #value = calling_frame.f_locals.get(name, calling_frame.f_globals.get(name, None))
+        value=value_of(name)
+        print("in f.ppl: name:",name,", value: ",value)
+        return ppl0(value,n=n,name=name,print_=print_)
+def ppl0(l,n=3,name=None,print_=False): # print par of a list
+    #print("in ppl0: name:",name,", value:",l)
+    if l is None:
+        name_=name if name is not None else ""
+        print("in f.ppl0: name:",name,", value:",l,"!")
+        return None
+    rc="" if name is None else (name+": ")
+    rc=rc+str(len(l))
+    rc=rc+" "
+    rc=rc+str(l[:min(len(l),n)])
+    if print_:
+        print(rc)
+    return rc
+global_var = 123
+def some_func():
+    local_var = 456
+    print(value_of("global_var"))
+    print(value_of("local_var"))
+    print(value_of("some_func"))
+#some_func() #
+
 @contextmanager
 def timing(description: str,units=1,title="",before="") -> None:
     if before!="":
