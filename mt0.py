@@ -4,9 +4,13 @@ import multiprocessing as mp
 import threading
 import time
 import os
+import sys
+#import functions as f
+import typing as ty
+def enqueue(l:ty.Iterable[str]):
+   for word in l:
+      workQueue.put(word)
 exitFlag = 0
-
-
 class myThread (threading.Thread):
    def __init__(self, threadID, name, q):
       threading.Thread.__init__(self)
@@ -15,14 +19,11 @@ class myThread (threading.Thread):
       self.threadID = threadID
       self.name = name
       self.q = q
-
    def run(self):
       print("Starting " + self.name)
-      process_data(self.name, self.q)
+      processData(self.name, self.q)
       print("Exiting " + self.name)
-
-
-def process_data(threadName, q):
+def processData(threadName, q):
    while not exitFlag:
       queueLock.acquire()
       if not workQueue.empty():
@@ -32,36 +33,30 @@ def process_data(threadName, q):
       else:
          queueLock.release()
       time.sleep(1)
-
-
-threadList = ["Thread-1", "Thread-2", "Thread-3"]
-nameList = ["One", "Two", "Three", "Four", "Five"]
+nThreads=3
+threadNames = ['Thread-'+str(i) for i in range(nThreads)]
+dataList = ["One", "Two", "Three", "Four", "Five"]
+if True:
+   # get thread couny and names
+   pass
 queueLock = threading.Lock()
 workQueue = mp.Queue(10)
 threads = []
-threadID = 1
-
-# Create new threads
-for tName in threadList:
-   thread = myThread(threadID, tName, workQueue)
-   thread.start()
-   threads.append(thread)
-   threadID += 1
-
-# Fill the queue
+if True:
+   threads = [myThread(i+1, name, workQueue) for i,name in enumerate(threadNames)]
+   for thread in threads:
+      thread.start()
+else:
+   for id,name in enumerate(threadNames):
+      thread = myThread(id+1, name, workQueue)
+      thread.start()
+      threads.append(thread)
 queueLock.acquire()
-for word in nameList:
-   workQueue.put(word)
+enqueue(dataList)
 queueLock.release()
-
-# Wait for queue to empty
 while not workQueue.empty():
    pass
-
-# Notify threads it's time to exit
 exitFlag = 1
-
-# Wait for all threads to complete
 for t in threads:
    t.join()
 print("Exiting Main Thread")
