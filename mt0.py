@@ -1,32 +1,38 @@
 #!/usr/bin/python
-https://www.tutorialspoint.com/python/python_multithreading.htm
+#https://www.tutorialspoint.com/python/python_multithreading.htm
 import multiprocessing as mp
 import threading
 import time
 import os
 exitFlag = 0
 
+
 class myThread (threading.Thread):
    def __init__(self, threadID, name, q):
       threading.Thread.__init__(self)
       self.threadID = threadID
+      self.threadID = threadID
+      self.threadID = threadID
       self.name = name
       self.q = q
+
    def run(self):
       print("Starting " + self.name)
       process_data(self.name, self.q)
       print("Exiting " + self.name)
 
+
 def process_data(threadName, q):
-    while not exitFlag:
-        queueLock.acquire()
-        if not workQueue.empty():
-            data = q.get()
-            queueLock.release()
-            print("%s processing %s" % (threadName, data))
-        else:
-            queueLock.release()
-        time.sleep(1)
+   while not exitFlag:
+      queueLock.acquire()
+      if not workQueue.empty():
+         data = q.get()
+         queueLock.release()
+         print("%s processing %s" % (threadName, data))
+      else:
+         queueLock.release()
+      time.sleep(1)
+
 
 threadList = ["Thread-1", "Thread-2", "Thread-3"]
 nameList = ["One", "Two", "Three", "Four", "Five"]
