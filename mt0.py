@@ -70,14 +70,14 @@ nThreads=3
 threadNames = ['Thread-'+str(i) for i in range(nThreads)]
 global dataList
 dataList=[]
-units=10
+units=20
 if True:
    dataList=get_files(units)
 else:
    dataList = ["One", "Two", "Three", "Four", "Five"]
 print("process",len(dataList),"units using",len(threadNames),"threads.")
 queueLock = threading.Lock()
-workQueue = mp.Queue(10)
+workQueue = mp.Queue()
 threads = [myThread(i+1, name, workQueue) for i,name in enumerate(threadNames)]
 for thread in threads:
    thread.start()
