@@ -10,7 +10,6 @@ import typing as ty
 import slow as sl
 import gc
 from matplotlib import image as im
-testMode=False
 def readFile(path):
     image = im.imread(path)
     if verbose: print("read file:",os.path.basename(path))
@@ -72,22 +71,23 @@ def get_files(units=None):
     folder=images[0]
     l=l if units is None else l[:units]
     return l
-def getList(units=None):
-   if testMode: dataList = ["One", "Two", "Three", "Four", "Five"]
+def getList(useOld,units=None):
+   if useOld: dataList = range(units) if units is not None else 10
    else: dataList=get_files(units=units)
    return dataList
 #global dataList
-verbose=True
+verbose=False
 gl={'done':False,'queue':None,'lock':None} # global dictionary
 nThreads=5
 threadNames = ['Thread-'+str(i) for i in range(nThreads)]
-def run(units=None):
-   dataList=getList(units=units)
+def run(arguments,units=None):
+   dataList=getList(arguments.old,units=units)
    print("process",len(dataList),"units using",len(threadNames),"threads.")
+   print("first element is:",dataList[0])
    gl['lock']=threading.Lock()
    gl['queue']=mp.Queue()
    f1=g=None
-   if True:
+   if not arguments.old:
       f1=readFile
       g=slow4040
    print("f:",f1,", g:",g)
@@ -99,12 +99,7 @@ def run(units=None):
    gl['lock'].release()
    if verbose: print("run() enqueued.")
    if verbose: print("run() before timing.")
-   if True:
-      with bf.timing("run() says queue is empty",units=units,title="",before="wait for queue to empty"):
-         if verbose: print("run() time wait.")
-         while not gl['queue'].empty():
-            pass
-   else:
+   with bf.timing("run() says queue is empty",units=units,title="",before="wait for queue to empty"):
       if verbose: print("run() time wait.")
       while not gl['queue'].empty():
          pass
@@ -116,7 +111,17 @@ def run(units=None):
       t.join()
    if verbose: print("exit run()")
 def main():
-   units=40
-   run(units=units)
+   import argparse
+   global verbose
+   parser = argparse.ArgumentParser()
+   parser.add_argument('-v',"--verbosity", help="increase output verbosity",action="store_true")
+   parser.add_argument('-o','--old', help="use old data",action="store_true")
+   #parser.add_argument("arg1")
+   arguments = parser.parse_args()
+   print('arguments:',arguments)
+   print(type(arguments))
+   units=40 if not arguments.old else 5
+   verbose=arguments.verbosity
+   run(arguments,units=units)
 if __name__ == "__main__":
     main()
