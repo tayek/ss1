@@ -114,13 +114,17 @@ def main():
    import argparse
    global verbose
    parser = argparse.ArgumentParser()
-   parser.add_argument('-v',"--verbosity", help="increase output verbosity",action="store_true")
+   parser.add_argument('-v',"--verbosity", help="increase output verbosity.",action="store_true")
    parser.add_argument('-o','--old', help="use old data",action="store_true")
+   parser.add_argument('-u','--units', action="store", type=int, help="set number of units.")
    #parser.add_argument("arg1")
    arguments = parser.parse_args()
    print('arguments:',arguments)
    print(type(arguments))
-   units=40 if not arguments.old else 5
+   units=None
+   if arguments.units is not None:
+      units=arguments.units
+   units=arguments.units if arguments.units is not None else 9
    verbose=arguments.verbosity
    run(arguments,units=units)
 if __name__ == "__main__":
