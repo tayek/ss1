@@ -5,7 +5,7 @@ import threading
 import time
 import os
 import sys
-import functions as f
+import functions as bf
 import typing as ty
 import slow as sl
 import gc
@@ -33,7 +33,7 @@ def processFile(path,f=None,g=None):
    return z
 def processData(threadName,q:mp.Queue,f=None,g=None):
    while not gl['done']:
-      if verbose: print("not done, acquire lock")
+      if verbose: print(threadName,"not done, acquire lock")
       gl['lock'].acquire()
       if verbose: print("got lock")
       if not gl['queue'].empty():
@@ -45,7 +45,7 @@ def processData(threadName,q:mp.Queue,f=None,g=None):
          if verbose: print("release lock")
          gl['lock'].release()
          if verbose: print(threadName,"says queue is empty")
-      time.sleep(1)
+      time.sleep(.1)
 class myThread (threading.Thread):
    def __init__(self, id, name, q:mp.Queue,f,g):
       threading.Thread.__init__(self)
@@ -63,7 +63,7 @@ def get_pngs(folder):
    l=[folder+'/'+e for e in l if '.png' in e]
    return l
 def get_files(units=None):
-    images,jsons,labels=f.get_camera_folders(f.get_path(),root=f.get_root())
+    images,jsons,labels=bf.get_camera_folders(bf.get_path(),root=bf.get_root())
     print(len(images),' folders for images')
     l=[]
     for folder in images:
@@ -88,21 +88,30 @@ def run(units=None):
    gl['queue']=mp.Queue()
    f1=g=None
    if True:
-      f=readFile
+      f1=readFile
       g=slow4040
-   print("f:",f,", g:",g)
+   print("f:",f1,", g:",g)
    threads = [myThread(i+1, name, gl['queue'],f=f1,g=g) for i,name in enumerate(threadNames)]
    for thread in threads: thread.start()
+   if verbose: print("run() enqueue.")
    gl['lock'].acquire()
    enqueue(dataList)
    gl['lock'].release()
-   with f.timing("queue is empty",units=units,title="",before="wait for queue to empty"):
+   if verbose: print("run() enqueued.")
+   if verbose: print("run() before timing.")
+   if True:
+      with bf.timing("run() says queue is empty",units=units,title="",before="wait for queue to empty"):
+         if verbose: print("run() time wait.")
+         while not gl['queue'].empty():
+            pass
+   else:
+      if verbose: print("run() time wait.")
       while not gl['queue'].empty():
          pass
    if verbose: print("run() says queue is empty.")
    if verbose: print("set done true.")
    gl['done']=True
-   if verbose: print("wai for join.")
+   if verbose: print("wait for join.")
    for t in threads:
       t.join()
    if verbose: print("exit run()")
