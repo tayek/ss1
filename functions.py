@@ -11,11 +11,10 @@ import ntpath
 import json
 import pathlib
 from timeit import default_timer as timer
-epsilon = 1.0e-10 # norm should not be small
 from contextlib import contextmanager
 #from time import time
-from timeit import default_timer as timer
 import sys
+epsilon = 1.0e-10 # norm should not be small
 def display(var): # not used?
     import inspect, re
     callingframe = inspect.currentframe().f_back
@@ -69,7 +68,7 @@ def timing(description: str,units=1,title="",before="") -> None:
     if units is None:
         print(f"{title} {description}: {dt} seconds.",flush=True)
     else:
-        print(f"{title} {description}: {dt} seconds. {str(frequency)} units/second.",flush=True) 
+        print(f"{title} {description}: {str(units)} units, {dt} seconds. {str(frequency)} units/second.",flush=True) 
     return dt
 def fix(path):
     return path.replace("\\","/").replace("\\","")
