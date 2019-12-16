@@ -21,6 +21,12 @@ with f.timing("import tensorflow",1):
 one=False
 #one=True
 autotune = tf.data.experimental.AUTOTUNE
+def makeDatasets(filesets):
+    datasets=[]
+    for i,fileset in enumerate(filesets): 
+        ds=tf.data.Dataset.from_tensor_slices(fileset) # each dataset is one list
+        datasets.append(ds)
+    return datasets
 def time_make_list_files_dataset_str(path,pattern): # this is a list files dataset.
     path=pathlib.Path(path)
     from_glob=f.get_flowers_files(path,pattern)
@@ -62,7 +68,7 @@ def decode_image(image,width,height,jpeg=False):
 def read_file(filename):
     binary=tf.io.read_file(filename)
     return binary
-def decode_img(img):
+def decode_img(img): # this way may be better than image.read?
     # convert the compressed string to a 3D uint8 tensor
     img = tf.image.decode_png(img, channels=3) # probably will not work for flowers
     # Use `convert_image_dtype` to convert to floats in the [0,1] range.
@@ -121,7 +127,8 @@ def do_enumeration(ds,parse=None,parse2=None):
             #print("y",type(y),y.shape)
         n+=1
     print("after enumeration, n: ",n,flush=True)
-def time_enumeration(ds,units):
+    return n
+def time_enumeration(ds,units=1):
     print("start enumeration.",flush=True)
     with f.timing("enumerate over dataset "+str(units)+" units.",units):
         do_enumeration(ds)
@@ -139,7 +146,7 @@ def write_file(n): # not thread safe
     now=datetime.datetime.utcnow().timestamp()
     f.create_file(name,str([now]))
 def time_enumerations(ds,units=1,title=""):
-    with f.timing("enumerate over dataset of "+str(units)+" units and map outside of dataset.",units,title): # why does this require the f.?
+    with f.timing("enumerate over:",type(ds),"dataset of "+str(units)+" units and map outside of dataset.",units,title): # why does this require the f.?
         do_enumeration(ds,parse=parse1)
     print("1",flush=True)
     mapped=time_dataset_map(ds,parse1and,units,autotune,title=title+"time dataset.map inside dataset (no enumeration).")

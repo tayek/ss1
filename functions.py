@@ -43,18 +43,10 @@ def ppl0(l,n=3,name=None,print_=False): # print par of a list
     rc="" if name is None else (name+": ")
     rc=rc+str(len(l))
     rc=rc+" "
-    rc=rc+str(l[:min(len(l),n)])
+    rc=rc+str(l[:min(len(l),n)]) # may not need the min?
     if print_:
         print(rc)
     return rc
-global_var = 123
-def some_func():
-    local_var = 456
-    print(value_of("global_var"))
-    print(value_of("local_var"))
-    print(value_of("some_func"))
-#some_func() #
-
 @contextmanager
 def timing(description: str,units=1,title="",before="") -> None:
     if before!="":
@@ -104,11 +96,19 @@ def get_files(path,pattern,root=None):
     files = sorted(glob.glob(path))
     fixed=[fix(file) for file in files]
     return fixed
+def getFilesets(folders,pattern):
+    filesets=[]
+    for i,folder in enumerate(folders): 
+        files=get_files(folder,pattern)
+        units=len(files)
+        #print(i,"folder: "+folder,"has:",len(files),"files.")
+        filesets.append(files)
+    return filesets
 def get_flowers_files(path,pattern):
     path=pathlib.Path(path)
     from_glob=get_files(path,pattern)
     return from_glob
-def get_camera_folder(path,root=None):
+def xget_camera_folder(path,root=None): # we should ge able to get rid of this, just ignore the other 3 return values.
     path = join(root,path) if root is not None else join(path)
     path=fix(path)
     images=get_files(path,'*/camera/*')

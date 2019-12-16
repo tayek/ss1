@@ -61,3 +61,10 @@ using multiple threads costs a lot, we get close to 10 with many threads.
 maybe we can overlap the cpu time with the io time, so i made slow.
 i keep breaking my.py - need to start over with a fresh copy of mt0.py
 
+seems to be working again on 12/12
+
+newpipe.py seems to work here.
+
+try making a dataset for each camera folder and the try interleaving?
+dscat.py does something similar, so let's fool with that one.
+

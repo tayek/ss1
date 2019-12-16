@@ -22,6 +22,10 @@ def load_some_from_one_camera_folder(folder,limit=None):
             # load image
             path=camera_folder+'/'+filename
             img_data = im.imread(path)
+            if i==0:
+                print("image data:",type(img_data),img_data.shape)
+                d=img_data.__dict__()
+                print("dictionary from image object:",d)
             if i<20: # uses all of memory
                 loaded_images.append(img_data)
                 gc.collect()

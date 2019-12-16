@@ -7,16 +7,29 @@ import os
 import sys
 import functions as bf
 import typing as ty
-import slow as sl
 import gc
+import math
 from matplotlib import image as im
+def slow(m,n): 
+    x=list(range(n))
+    for i in range(m):
+        for j in range(n):
+            x=list(range(n))
+            x=[math.sin(e) for e in x]
+            x=[math.cos(e) for e in x]
+            x=[e if e>0 else -e for e in x ]
+            x=[math.log(e) for e in x]
+            x=[math.exp(e) for e in x]
+            x=[math.log(e) for e in x]
+            x=[math.cos(e) for e in x]
+            x=[math.sin(e) for e in x]
 def readFile(path):
     image = im.imread(path)
     if verbose: print("read file:",os.path.basename(path))
     gc.collect() # not sure where this should go
     return image
 def slow4040(unused):
-   sl.slow(40,40)
+   slow(40,40)
 def enqueue(l:ty.Iterable[str]):
    if verbose: print("length:",len)
    for word in l:
